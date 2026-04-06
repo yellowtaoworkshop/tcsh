@@ -152,6 +152,8 @@ EXTERN size_t CursSaved;	/* points to the cursor point in saved buf */
 EXTERN int HistSaved;		/* Hist_num is saved in this */
 EXTERN char RestoreSaved;	/* true if SavedBuf should be restored */
 EXTERN int IncMatchLen;		/* current match length during incremental search */
+EXTERN Char AutoSugBuf[INBUFSIZE]; /* autosuggestion ghost text *//*FIXBUF*/
+EXTERN int  AutoSugLen;		/* length of current autosuggestion */
 EXTERN char Expand;		/* true if we are expanding a line */
 extern Char HistLit;		/* true if history lines are shown literal */
 EXTERN Char CurrentHistLit;	/* Literal status of current show history line */

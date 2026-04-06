@@ -926,6 +926,7 @@ SetAttributes(Char atr)
 {
     atr &= ATTRIBUTES;
     if (atr != cur_atr) {
+
 	if (me_all && GoodStr(T_me)) {
 	    if (((cur_atr & BOLD) && !(atr & BOLD)) ||
 		((cur_atr & UNDER) && !(atr & UNDER)) ||
@@ -953,6 +954,7 @@ SetAttributes(Char atr)
 			cur_atr &= ~UNDER;
 		    }
 		    cur_atr &= ~BOLD;
+		    cur_atr &= ~FG_COLOR_MASK; /* Force color re-application */
 		}
 	    }
 	}
@@ -983,6 +985,29 @@ SetAttributes(Char atr)
 		    cur_atr &= ~UNDER;
 		}
 	    }
+	}
+
+	if ((atr & FG_COLOR_MASK) != (cur_atr & FG_COLOR_MASK)) {
+	    int color = (atr & FG_COLOR_MASK) >> FG_COLOR_SHIFT;
+
+	    if (color == 0) {
+		(void) tputs("\033[39m", 1, PUTPURE);
+	    } else {
+		char ansi_code[16];
+		int ccode = 39;
+		if (color == 1) ccode = 31;
+		else if (color == 2) ccode = 32;
+		else if (color == 3) ccode = 33;
+		else if (color == 4) ccode = 34;
+		else if (color == 5) ccode = 36;
+		else if (color == 6) ccode = 35;
+		else if (color == 7) ccode = 90;
+		/* using putpure instead of tputs to avoid termcap processing */
+		char *p;
+		xsnprintf(ansi_code, sizeof(ansi_code), "\033[%dm", ccode);
+		for(p = ansi_code; *p; p++) putpure(*p);
+	    }
+	    cur_atr = (cur_atr & ~FG_COLOR_MASK) | (atr & FG_COLOR_MASK);
 	}
     }
 }
@@ -1207,6 +1232,7 @@ so_write(Char *cp, int n)
 
     if (adrof(STRhighlight) && highlighting)
 	StopHighlight();
+    SetAttributes(0);
 
     if (CursorH >= TermH) { /* wrap? */
 	if (T_Margin & MARGIN_AUTO) { /* yes */

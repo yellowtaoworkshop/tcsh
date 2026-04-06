@@ -2567,6 +2567,17 @@ CCRETVAL
 e_toend(Char c)
 {
     USE(c);
+    if (Cursor == LastChar && AutoSugLen > 0) {
+	/* Accept the entire autosuggestion */
+	int i;
+	for (i = 0; i < AutoSugLen && LastChar < InputLim; i++)
+	    *LastChar++ = AutoSugBuf[i];
+	*LastChar = '\0';
+	Cursor = LastChar;
+	AutoSugLen = 0;
+	AutoSugBuf[0] = '\0';
+	return(CC_REFRESH);
+    }
     Cursor = LastChar;
     if (VImode)
 	if (ActionFlag & TCSHOP_DELETE) {
@@ -2800,6 +2811,22 @@ e_charfwd(Char c)
 
 	RefCursor();
 	return(CC_NORM);
+    }
+    else if (AutoSugLen > 0) {
+	/* Accept one character from autosuggestion */
+	if (LastChar < InputLim) {
+	    *LastChar++ = AutoSugBuf[0];
+	    *LastChar = '\0';
+	    Cursor = LastChar;
+	    /* Shift AutoSugBuf left by 1 */
+	    int i;
+	    for (i = 0; i < AutoSugLen - 1; i++)
+		AutoSugBuf[i] = AutoSugBuf[i + 1];
+	    AutoSugLen--;
+	    AutoSugBuf[AutoSugLen] = '\0';
+	    return(CC_REFRESH);
+	}
+	return(CC_ERROR);
     }
     else {
 	return(CC_ERROR);

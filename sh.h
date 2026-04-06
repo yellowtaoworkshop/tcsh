@@ -741,7 +741,16 @@ extern struct sigaction parterm;	/* Parents terminate catch */
 # define	BOLD		0x04000000 /* Bold flag */
 # define	STANDOUT	0x02000000 /* Standout flag */
 # define	LITERAL		0x01000000 /* Literal character flag */
-# define	ATTRIBUTES	0x0F000000 /* The bits used for attributes */
+# define	FG_COLOR_SHIFT	28
+# define	FG_COLOR_MASK	0x70000000
+# define	COLOR_RED	(1 << FG_COLOR_SHIFT)
+# define	COLOR_GREEN	(2 << FG_COLOR_SHIFT)
+# define	COLOR_YELLOW	(3 << FG_COLOR_SHIFT)
+# define	COLOR_BLUE	(4 << FG_COLOR_SHIFT)
+# define	COLOR_CYAN	(5 << FG_COLOR_SHIFT)
+# define	COLOR_MAGENTA	(6 << FG_COLOR_SHIFT)
+# define	COLOR_GRAY	(7 << FG_COLOR_SHIFT)
+# define	ATTRIBUTES	(0x0F000000|FG_COLOR_MASK) /* The bits used for attributes */
 # define	INVALID_BYTE	0xF0000000 /* Invalid character on input */
 # ifdef SOLARIS2
 #  define	CHAR		0x30FFFFFF /* Mask to mask out the character */

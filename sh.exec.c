@@ -1087,21 +1087,27 @@ find_cmd(Char *cmd, int prt)
     Char *sv;
     int hashval, rehashed, i, ex, rval = 0;
 
-    if (prt && any(short2str(cmd), '/')) {
+    int slash = any(short2str(cmd), '/');
+
+    if (prt && slash) {
 	xprintf("%s", CGETS(13, 7, "where: / in command makes no sense\n"));
 	return rval;
     }
 
     /* first, look for an alias */
 
-    if (prt && adrof1(cmd, &aliases)) {
-	if ((var = adrof1(cmd, &aliases)) != NULL) {
-	    xprintf(CGETS(13, 8, "%" TCSH_S " is aliased to "), cmd);
-	    if (var->vec != NULL)
-		blkpr(var->vec);
-	    xputchar('\n');
-	    rval = 1;
+    if (adrof1(cmd, &aliases)) {
+	if (prt) {
+	    if ((var = adrof1(cmd, &aliases)) != NULL) {
+		xprintf(CGETS(13, 8, "%" TCSH_S " is aliased to "), cmd);
+		if (var->vec != NULL)
+		    blkpr(var->vec);
+		xputchar('\n');
+	    }
 	}
+	rval = 1;
+	if (!prt)
+	    return rval;
     }
 
     /* next, look for a shell builtin */
@@ -1128,6 +1134,12 @@ find_cmd(Char *cmd, int prt)
 #endif /* WINNT_NATIVE*/
 
     /* last, look through the path for the command */
+
+    if (slash) {
+	if (executable(NULL, cmd, 0))
+	    rval = 1;
+	return rval;
+    }
 
     if ((var = adrof(STRpath)) == NULL)
 	return rval;
